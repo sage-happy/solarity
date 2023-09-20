@@ -14,13 +14,23 @@
          $data[] = $row['solar_voltage'];
          $categories[] = $row['time'];
      }
-    pg_close($conn);
 
      $chartData = json_encode($data, JSON_NUMERIC_CHECK);
      $cat_data = json_encode($categories);
-    
+
+     $cat_data_array = json_decode($cat_data, true);
+
+     echo "data fetched-------------";
+     // Print the resulting array
+     print_r($cat_data_array);
+
+// // Send the data to all connected clients
+// foreach ($this->clients as $client) {
+//     $client->send($chartData);
+// }
+     //$cat_data=array_merge(array_slice($cat_data, 0, 5), array_slice($cat_data, 9));
     $jsCode= <<<EOD
-        Highcharts.chart('svchart', {
+        var chart=Highcharts.chart('svchart', {
             title: {
                 text: 'Solar voltage against time'
             },
@@ -48,8 +58,15 @@
                 data: $chartData
             }]
         }); 
+        
+        function update(){
+            console.log($chartData);
+            chart.series[0].setData($chartData);
+            console.log('After updating');
+        }
+        setTimeout(update, 3000);
         EOD;
-    
+        
         echo "<script>$jsCode</script>"; 
 
 ?>
